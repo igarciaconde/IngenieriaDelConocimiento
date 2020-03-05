@@ -33,11 +33,13 @@ class State():
         self.putEnd = False
         self.putObs = False
         self.putWall = False
+        self.putCle = False
         self.buttonFlagList = list()
         self.buttonFlagList.append(self.putIni)
         self.buttonFlagList.append(self.putEnd)
         self.buttonFlagList.append(self.putIni)
         self.buttonFlagList.append(self.putIni)
+        self.buttonFlagList.append(self.putCle)
 
         self.lastIniR = None
         self.lastIniC = None
@@ -47,8 +49,8 @@ class State():
         self.board = []
         self.buttonList = list()
         self.buttonControlList = list()
-        for x in range(12):
-            self.board.append([0,0,0,0,0,0,0,0,0,0,0,0])
+        for x in range(24):
+            self.board.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
             self.buttonList.append(list())
 
 
@@ -60,7 +62,7 @@ class State():
         while current_node is not None:
             path.append(current_node.position)
             current_node = current_node.parent
-        #Le damos la vuelta a la lista
+        #Le damos la vuelta a la lista0,0,0,0,0,0,0,0,0,0,0,0
         path.pop()
         path = path[::-1]
         path.pop()
@@ -171,12 +173,13 @@ class State():
 
             
     def clearButtonC(self):
-        for x in range(4):
-            self.buttonControlList[x]['highlightbackground'] = 'white'
+        for x in range(5):
+            self.buttonControlList[x]['highlightbackground'] = 'lightgrey'
+            self.buttonControlList[x]['bg'] = 'lightgrey'
 
     def printBoard(self):
-        for x in range(12):
-            for y in range(12):
+        for x in range(24):
+            for y in range(24):
                 if self.board[x][y] == 0:
                     self.buttonList[x][y]['highlightbackground'] = 'black'
                     self.buttonList[x][y]['bg'] = 'black'
@@ -202,33 +205,36 @@ class State():
                 self.board[path[i][0]][path[i][1]] = 10
                 self.printBoard()
         if self.able == False:
-            messagebox.showinfo("Impossible","The problem hasn´t solution")
+            messagebox.showinfo("Impossible","No solution for the problem")
             
     
     def onClickControl(self, pos):
-        for x in range(4):
+        for x in range(5):
             if x == pos:
                 self.buttonFlagList[x] = True
             else:
                 self.buttonFlagList[x] = False
-                self.buttonControlList[x]['highlightbackground'] = 'white'
-                self.buttonControlList[x]['bg'] = 'white'
+                self.buttonControlList[x]['highlightbackground'] = 'lightgrey'
+                self.buttonControlList[x]['bg'] = 'lightgrey'
         if pos == 0:
             self.buttonControlList[pos]['highlightbackground'] = 'green'
-            self.buttonControlList[x]['bg'] = 'green'
+            self.buttonControlList[pos]['bg'] = 'green'
         elif pos == 1:
             self.buttonControlList[pos]['highlightbackground'] = 'red'
-            self.buttonControlList[x]['bg'] = 'red'
+            self.buttonControlList[pos]['bg'] = 'red'
         elif pos == 2:
             self.buttonControlList[pos]['highlightbackground'] = 'blue'
-            self.buttonControlList[x]['bg'] = 'blue'
+            self.buttonControlList[pos]['bg'] = 'blue'
         elif pos == 3:
             self.buttonControlList[pos]['highlightbackground'] = 'yellow'
-            self.buttonControlList[x]['bg'] = 'yellow'
+            self.buttonControlList[pos]['bg'] = 'yellow'
+        elif pos == 4:
+            self.buttonControlList[pos]['highlightbackground'] = 'grey'
+            self.buttonControlList[pos]['bg'] = 'grey'
             
 
     def onCellClick(self, row, column):
-        for pos in range(4):
+        for pos in range(5):
             if self.buttonFlagList[pos] == True:
                 if pos == 0:
                     if self.lastIniR is not None:
@@ -245,9 +251,23 @@ class State():
                     self.lastEndR = row
                     self.lastEndC = column
                 elif pos == 2:
+                    if row == self.start[0] and column == self.start[1]:
+                        self.start = [-1,-1]
+                    if row == self.end[0] and column == self.end[1]:
+                        self.end = [-1,-1]
                     self.board[row][column] = 1
                 elif pos == 3:
+                    if row == self.start[0] and column == self.start[1]:
+                        self.start = [-1,-1]
+                    if row == self.end[0] and column == self.end[1]:
+                        self.end = [-1,-1]
                     self.board[row][column] = 2
+                elif pos == 4:
+                    if row == self.start[0] and column == self.start[1]:
+                        self.start = [-1,-1]
+                    if row == self.end[0] and column == self.end[1]:
+                        self.end = [-1,-1]
+                    self.board[row][column] = 0
         self.printBoard()
 
     def addToButtonList(self, x, button):
@@ -260,7 +280,7 @@ class State():
         self.start = [-1,-1]
         self.end = [-1,-1]
 
-        for i in range(4):
+        for i in range(5):
             self.buttonFlagList[i] = False
 
         self.lastIniR = None
@@ -268,12 +288,12 @@ class State():
         self.lastEndR = None
         self.lastEndC = None
 
-        for x in range(12):
-            for y in range(12):
+        for x in range(24):
+            for y in range(24):
                 self.board[x][y] = 0
         self.printBoard()
         self.clearButtonC()
-        for i in range(5):
+        for i in range(6):
                 self.buttonControlList[i]['state'] = 'normal'
     
     def startmethod(self):
@@ -281,7 +301,7 @@ class State():
             messagebox.showerror("Cancelled", "You must define init and end point")
             return
         else:
-            for i in range(5):
+            for i in range(6):
                 self.buttonControlList[i]['state'] = 'disabled'
             self.clearButtonC()
             result = self.aStar(self.board, self.start, self.end)
@@ -292,40 +312,46 @@ def main():
     #########
     state = State()
     root = Tk()
-    root.geometry('450x312')
+    root.resizable(False,False)
+    root.geometry('900x646')
     root.title("AStar")
 
-    tab = Canvas(root, width=325, height=312)
-    controlSet = Canvas(root, width=100, height= 312, borderwidth=1, relief="raised")
-    tab.place(x = 0, y = 0)
-    controlSet.place(x = 345, y = 0)
+    tab = Canvas(root, width=600, height=646)
+    controlSet = Canvas(root, width=300, height= 646, borderwidth=1, relief="raised")
+    tab.pack(side='left')
+    controlSet.pack(side='left')
 
-    for x in range(12):
-        for y in range(12):
-            button = Button(master=tab, command=lambda row=x, column=y: state.onCellClick(row, column), highlightbackground='black', pady=2, relief=FLAT)
+    for x in range(24):
+        for y in range(24):
+            button = Button(master=tab, command=lambda row=x, column=y: state.onCellClick(row, column), highlightbackground='black', bg='black' ,pady=2, relief=FLAT)
             button.grid(row=y,column=x)
             state.addToButtonList(x,button)
 
-    ini = Button(master=controlSet, text='Select init', command=lambda pos=0: state.onClickControl(pos))
+    ini = Button(master=controlSet, text='Put start', command=lambda pos=0: state.onClickControl(pos), width=20)
     state.addToControlList(ini)
-    end = Button(master=controlSet, text='Select end', command=lambda pos=1: state.onClickControl(pos))
+    ini.pack(side = TOP, expand=YES)
+    end = Button(master=controlSet, text='Put end', command=lambda pos=1: state.onClickControl(pos), width=20)
     state.addToControlList(end)
-    wall = Button(master=controlSet, text='Select wall', command=lambda pos=2: state.onClickControl(pos))
+    end.pack(side = TOP, expand=YES)
+    wall = Button(master=controlSet, text='Put wall', command=lambda pos=2: state.onClickControl(pos), width=20)
     state.addToControlList(wall)
-    obs = Button(master=controlSet, text='Select bar', command=lambda pos=3: state.onClickControl(pos))
+    wall.pack(side = TOP, expand=YES)
+    obs = Button(master=controlSet, text='Put obstacle', command=lambda pos=3: state.onClickControl(pos), width=20)
     state.addToControlList(obs)
-    ini.pack()
-    end.pack()
-    wall.pack()
-    obs.pack()
+    obs.pack(side = TOP, expand=YES)
+    cle = Button(master=controlSet, text='Clear Cell', command=lambda pos=4: state.onClickControl(pos), width=20)
+    state.addToControlList(cle)
+    cle.pack(side=TOP, expand=YES)
 
-    start = Button(master=controlSet, text='START', command=lambda: state.startmethod())
+
+    start = Button(master=controlSet, text='RUN', command=lambda: state.startmethod(), width=20, highlightbackground='black')
     state.addToControlList(start)
-    restart = Button(master=controlSet, text='RESTART', command=lambda: state.restart())
+    start.pack(side = TOP, expand=YES)
+    restart = Button(master=controlSet, text='RESTART', command=lambda: state.restart(), width=20, highlightbackground='black')
     state.addToControlList(restart)
-    restart.pack(side='bottom')
-    start.pack(side='bottom')
+    restart.pack(side = TOP, expand=YES)
 
+    controlSet.pack(fill=BOTH, expand=YES)
     root.mainloop()
 
 if __name__ == '__main__':
